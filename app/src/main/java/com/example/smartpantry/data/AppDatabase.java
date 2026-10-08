@@ -2,9 +2,11 @@ package com.example.smartpantry.data;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -27,10 +29,17 @@ public abstract class AppDatabase extends RoomDatabase {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
                 if (INSTANCE == null) {
-                    INSTANCE = Room.databaseBuilder(
-                                    context.getApplicationContext(),
-                                    AppDatabase.class,
-                                    "smart_pantry.db")
+                    final Context appContext = context.getApplicationContext();
+                    INSTANCE = Room.databaseBuilder(appContext, AppDatabase.class, "smart_pantry.db")
+                            .addCallback(new RoomDatabase.Callback() {
+                                @Override
+                                public void onOpen(@NonNull SupportSQLiteDatabase db) {
+                                    super.onOpen(db);
+                                    // Seed on a background thread; does nothing if recipes exist.
+                                    DB_EXECUTOR.execute(() ->
+                                            RecipeSeeder.seedIfEmpty(getInstance(appContext)));
+                                }
+                            })
                             .build();
                 }
             }
