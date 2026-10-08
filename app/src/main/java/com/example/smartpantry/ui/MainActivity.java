@@ -2,6 +2,8 @@ package com.example.smartpantry.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
@@ -89,5 +91,21 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         new ItemTouchHelper(callback).attachToRecyclerView(recycler);
+    }
+
+    // Toolbar button that opens the Suggested Recipes screen
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_suggested) {
+            startActivity(new Intent(this, SuggestedActivity.class));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
