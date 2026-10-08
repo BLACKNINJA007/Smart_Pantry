@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.smartpantry.R;
@@ -66,6 +67,7 @@ public class AddEditActivity extends AppCompatActivity {
         spinnerUnit = findViewById(R.id.spinnerUnit);
         Button buttonSave = findViewById(R.id.buttonSave);
         Button buttonClearDate = findViewById(R.id.buttonClearDate);
+        Button buttonDelete = findViewById(R.id.buttonDelete);
 
         unitAdapter = ArrayAdapter.createFromResource(
                 this, R.array.units, android.R.layout.simple_spinner_item);
@@ -83,6 +85,8 @@ public class AddEditActivity extends AppCompatActivity {
         itemId = getIntent().getLongExtra(EXTRA_ITEM_ID, -1);
         if (itemId != -1) {
             toolbar.setTitle("Edit ingredient");
+            buttonDelete.setVisibility(View.VISIBLE);   // only makes sense when editing
+            buttonDelete.setOnClickListener(v -> confirmDelete());
             loadItem();
         }
     }
@@ -176,6 +180,22 @@ public class AddEditActivity extends AppCompatActivity {
             }
             runOnUiThread(this::finish);
         });
+    }
+
+    /** Asks before deleting so a mis-tap does not lose data. */
+    private void confirmDelete() {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete ingredient?")
+                .setMessage("This will remove it from your pantry.")
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Delete", (dialog, which) ->
+                        AppDatabase.DB_EXECUTOR.execute(() -> {
+                            PantryItem item = new PantryItem();
+                            item.id = itemId;
+                            dao.delete(item);                                    // Delete
+                            runOnUiThread(this::finish);
+                        }))
+                .show();
     }
 
     private String formatQuantity(double q) {
