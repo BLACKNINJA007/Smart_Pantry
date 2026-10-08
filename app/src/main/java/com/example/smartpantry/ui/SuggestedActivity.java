@@ -2,11 +2,9 @@ package com.example.smartpantry.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,6 +15,7 @@ import com.example.smartpantry.data.PantryItem;
 import com.example.smartpantry.data.RecipeWithIngredients;
 import com.example.smartpantry.logic.RecipeMatcher;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.List;
 
@@ -33,9 +32,6 @@ public class SuggestedActivity extends AppCompatActivity {
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
 
         textEmpty = findViewById(R.id.textEmpty);
 
@@ -43,6 +39,10 @@ public class SuggestedActivity extends AppCompatActivity {
         recycler.setLayoutManager(new LinearLayoutManager(this));
         adapter = new RecipeAdapter(this::onRecipeTapped);
         recycler.setAdapter(adapter);
+
+        BottomNavigationView nav = findViewById(R.id.bottomNav);
+        NavHelper.setup(this, nav, R.id.nav_suggested);
+        NavHelper.applyInsets(findViewById(R.id.root), findViewById(R.id.appBar), nav);
     }
 
     /** Re-run the matching every time the screen comes back, so changes to the pantry show up. */
@@ -71,14 +71,5 @@ public class SuggestedActivity extends AppCompatActivity {
         Intent intent = new Intent(this, RecipeDetailActivity.class);
         intent.putExtra(RecipeDetailActivity.EXTRA_RECIPE_ID, recipe.recipe.id);
         startActivity(intent);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            finish();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 }

@@ -2,8 +2,6 @@ package com.example.smartpantry.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
@@ -18,6 +16,7 @@ import com.example.smartpantry.data.AppDatabase;
 import com.example.smartpantry.data.PantryDao;
 import com.example.smartpantry.data.PantryItem;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -34,6 +33,11 @@ public class MainActivity extends AppCompatActivity {
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        // Bottom navigation (Pantry / Recipes / Settings)
+        BottomNavigationView nav = findViewById(R.id.bottomNav);
+        NavHelper.setup(this, nav, R.id.nav_pantry);
+        NavHelper.applyInsets(findViewById(R.id.root), findViewById(R.id.appBar), nav);
 
         textEmpty = findViewById(R.id.textEmpty);
 
@@ -53,6 +57,13 @@ public class MainActivity extends AppCompatActivity {
         // Explicit Intent: open the Add/Edit screen with no extras = "add mode"
         fab.setOnClickListener(v ->
                 startActivity(new Intent(this, AddEditActivity.class)));
+    }
+
+    /** Redraw the list when coming back, so a changed setting takes effect straight away. */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        adapter.notifyDataSetChanged();
     }
 
     private void onItemTapped(PantryItem item) {
@@ -91,21 +102,5 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         new ItemTouchHelper(callback).attachToRecyclerView(recycler);
-    }
-
-    // Toolbar button that opens the Suggested Recipes screen
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_suggested) {
-            startActivity(new Intent(this, SuggestedActivity.class));
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 }
